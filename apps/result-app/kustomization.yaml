@@ -15,4 +15,4 @@ resources:
 images:
   - name: result-app
     newName: ghcr.io/kt-coconut-cloud/result-app
-    newTag: "dev"
+    newTag: "dc03eec"
