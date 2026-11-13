@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: result-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/KT-Coconut-Cloud/gitops.git
+    targetRevision: main
+    path: apps/result-app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

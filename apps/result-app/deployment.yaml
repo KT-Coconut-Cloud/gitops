@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: result-app
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  template:
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: result-app
+          image: result-app
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: RESULT_APP_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: result-app
+                  key: session-secret
+            - name: RESULT_APP_ACCOUNTS_FILE
+              value: /etc/result-app/accounts.json
+          volumeMounts:
+            - name: accounts
+              mountPath: /etc/result-app
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      volumes:
+        - name: accounts
+          secret:
+            secretName: result-app
+            items:
+              - key: accounts.json
+                path: accounts.json
+        - name: tmp
+          emptyDir: {}
