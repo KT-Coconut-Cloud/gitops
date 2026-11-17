@@ -1,0 +1,4 @@
+# WorkflowTemplate의 image 위치는 kustomize 기본 대상이 아니라서 따로 지정
+images:
+  - path: spec/templates[]/container/image
+    kind: WorkflowTemplate

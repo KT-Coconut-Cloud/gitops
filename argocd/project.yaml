@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: coconut
+  namespace: argocd
+spec:
+  description: 개인정보 보호 분석 인프라
+  sourceRepos:
+    - https://github.com/KT-Coconut-Cloud/gitops.git
+    - https://argoproj.github.io/argo-helm
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: app
+    - server: https://kubernetes.default.svc
+      namespace: pii-job
+    - server: https://kubernetes.default.svc
+      namespace: argo
+  # Argo Workflows 차트가 만드는 클러스터 범위 리소스만 허용
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding

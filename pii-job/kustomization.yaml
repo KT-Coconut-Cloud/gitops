@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: pii-job
+
+labels:
+  - pairs:
+      app.kubernetes.io/name: pii-pipeline
+
+resources:
+  - serviceaccount.yaml
+  - workflowtemplate.yaml
+
+configurations:
+  - kustomizeconfig.yaml
+
+images:
+  - name: pii-pipeline
+    newName: ghcr.io/kt-coconut-cloud/pii-pipeline
+    newTag: "dev"
