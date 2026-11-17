@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: pii-job
+  namespace: argocd
+spec:
+  project: coconut
+  source:
+    repoURL: https://github.com/KT-Coconut-Cloud/gitops.git
+    targetRevision: main
+    path: pii-job
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: pii-job
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,13 @@
+controller:
+  # 파이프라인은 pii-job 네임스페이스에서만 실행
+  workflowNamespaces:
+    - pii-job
+
+workflow:
+  # 실행용 ServiceAccount와 Role은 pii-job/에서 관리
+  rbac:
+    create: false
+
+server:
+  authModes:
+    - client

@@ -1,0 +1,118 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: pii-pipeline
+spec:
+  entrypoint: main
+  serviceAccountName: pii-pipeline
+  arguments:
+    parameters:
+      # 반출 회차. 예: 20261117-01
+      - name: run-id
+  imagePullSecrets:
+    - name: ghcr-pull
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  activeDeadlineSeconds: 1800
+  ttlStrategy:
+    secondsAfterCompletion: 86400
+  podGC:
+    strategy: OnWorkflowSuccess
+  # 가명처리 결과는 단계 사이에서만 쓰고 워크플로가 끝나면 삭제
+  volumeClaimTemplates:
+    - metadata:
+        name: work
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+  volumeClaimGC:
+    strategy: OnWorkflowCompletion
+
+  templates:
+    - name: main
+      steps:
+        - - name: pseudonymize
+            template: pseudonymize
+        - - name: review
+            template: review
+        - - name: export-gate
+            template: export-gate
+
+    # 원본 DB를 읽는 유일한 단계. DB 접속 정보와 Vault 권한은 여기에만 있음
+    - name: pseudonymize
+      container:
+        image: pii-pipeline
+        args: ["pseudonymize"]
+        envFrom:
+          - secretRef:
+              name: pii-pipeline-db
+        env:
+          - name: VAULT_ADDR
+            value: http://vault.vault.svc:8200
+          - name: VAULT_ROLE
+            value: pii-pipeline
+          - name: VAULT_TRANSIT_KEY
+            value: citizen-id
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+
+    - name: review
+      container:
+        image: pii-pipeline
+        args: ["review", "--run-id", "{{workflow.parameters.run-id}}"]
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+
+    # 적정성 검토를 통과한 회차만 반입 버킷으로 올림. 탈락하면 검토 결과만 올리고 실패 처리
+    # pii-pipeline-aws: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, LANDING_BUCKET, S3_ENDPOINT_URL
+    - name: export-gate
+      container:
+        image: pii-pipeline
+        args: ["export"]
+        envFrom:
+          - secretRef:
+              name: pii-pipeline-aws
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]

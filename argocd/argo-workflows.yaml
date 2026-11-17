@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-workflows
+  namespace: argocd
+spec:
+  project: coconut
+  sources:
+    - repoURL: https://argoproj.github.io/argo-helm
+      chart: argo-workflows
+      targetRevision: 2.0.18
+      helm:
+        releaseName: argo-workflows
+        valueFiles:
+          - $values/argo/values.yaml
+    - repoURL: https://github.com/KT-Coconut-Cloud/gitops.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # CRD가 커서 client-side apply는 annotation 크기 제한에 걸림
+      - ServerSideApply=true
