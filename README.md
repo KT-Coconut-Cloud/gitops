@@ -10,7 +10,7 @@ k3s 배포 매니페스트 저장소
 | argocd/ | ArgoCD Application 정의 |
 | argo/ | Argo Workflows 설치 값 |
 | pii-job/ | 파이프라인 WorkflowTemplate, ServiceAccount, NetworkPolicy |
-| app/ | 결과 조회 앱 Deployment, Service, NetworkPolicy |
+| apps/result-app/ | 결과 조회 앱 Deployment, Service, Ingress |
 
 ## 작업 규칙
 
