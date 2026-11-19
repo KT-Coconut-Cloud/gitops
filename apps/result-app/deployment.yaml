@@ -28,6 +28,26 @@ spec:
                   key: session-secret
             - name: RESULT_APP_ACCOUNTS_FILE
               value: /etc/result-app/accounts.json
+            - name: RESULT_APP_DATA_SOURCE
+              value: s3
+            - name: RESULT_APP_S3_BUCKET
+              value: coconut-clean
+            - name: RESULT_APP_ANALYSIS_BACKEND
+              value: lambda
+            - name: RESULT_APP_ANALYSIS_FUNCTION
+              value: analysis-request
+            - name: AWS_DEFAULT_REGION
+              value: ap-northeast-2
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: result-app
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: result-app
+                  key: aws-secret-access-key
           volumeMounts:
             - name: accounts
               mountPath: /etc/result-app
