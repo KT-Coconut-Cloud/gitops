@@ -7,7 +7,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: result.coconut.local
+    - host: result.localtest.me
       http:
         paths:
           - path: /
