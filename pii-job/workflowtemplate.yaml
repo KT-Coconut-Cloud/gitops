@@ -57,8 +57,6 @@ spec:
             value: http://vault.vault.svc:8200
           - name: VAULT_ROLE
             value: pii-pipeline
-          - name: VAULT_TRANSIT_KEY
-            value: citizen-id
         volumeMounts:
           - name: work
             mountPath: /work
