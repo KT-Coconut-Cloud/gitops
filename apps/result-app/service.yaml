@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: result-app
+  annotations:
+    # pod IPs are unreachable from the traefik pod on this cluster, go through the ClusterIP
+    traefik.ingress.kubernetes.io/service.nativelb: "true"
 spec:
   selector: {}
   ports:
