@@ -1,4 +1,3 @@
-# PC 1 GitOps 저장소 (replica-db.yaml)
 apiVersion: v1
 kind: Service
 metadata:
