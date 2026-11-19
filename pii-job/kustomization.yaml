@@ -10,6 +10,7 @@ labels:
 resources:
   - serviceaccount.yaml
   - workflowtemplate.yaml
+  - networkpolicy.yaml
 
 configurations:
   - kustomizeconfig.yaml

@@ -1,0 +1,42 @@
+# pii-job은 원본 DB를 읽는 유일한 namespace라 나가는 곳을 필요한 대상으로만 제한
+# 들어오는 연결은 받을 일이 없어서 전부 차단
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pii-pipeline
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    # 원본 DB (primary-db 서비스가 가리키는 클러스터 밖 VM)
+    - to:
+        - ipBlock: {cidr: 10.121.0.168/32}
+      ports:
+        - {protocol: TCP, port: 3306}
+    # Vault Transit
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: vault
+      ports:
+        - {protocol: TCP, port: 8200}
+    # Argo 실행기가 단계 결과를 API 서버에 보고
+    - to:
+        - ipBlock: {cidr: 10.121.0.0/24}
+      ports:
+        - {protocol: TCP, port: 6443}
+    # S3 반출 (클러스터, 사설 대역 제외)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+      ports:
+        - {protocol: TCP, port: 443}

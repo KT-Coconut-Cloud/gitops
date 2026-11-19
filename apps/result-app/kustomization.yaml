@@ -12,6 +12,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+  - networkpolicy.yaml
 
 images:
   - name: result-app
