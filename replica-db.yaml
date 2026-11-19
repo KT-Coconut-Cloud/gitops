@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: replica-db
-  namespace: mysql 
+  namespace: database 
 spec:
   ports:
     - port: 3306
@@ -12,7 +12,7 @@ apiVersion: v1
 kind: Endpoints
 metadata:
   name: replica-db
-  namespace: mysql 
+  namespace: database
 subsets:
   - addresses:
       - ip: 10.121.0.180
