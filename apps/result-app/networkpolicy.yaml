@@ -1,0 +1,26 @@
+# 결과 조회 앱은 AWS(S3, Lambda)만 호출. 원본 DB와 클러스터 내부로는 나가지 못하게 막음
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: result-app
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    # Ingress(traefik)와 헬스체크
+    - ports:
+        - {protocol: TCP, port: 8000}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+      ports:
+        - {protocol: TCP, port: 443}
