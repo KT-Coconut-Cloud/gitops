@@ -7,7 +7,7 @@ spec:
   serviceAccountName: pii-pipeline
   arguments:
     parameters:
-      # 반출 회차. 예: 20261117-01
+      # 반출 회차. 예: 20261117-01. 모든 단계에 RUN_ID로 전달되고 단계 로그(JSON)에 찍힘
       - name: run-id
   imagePullSecrets:
     - name: ghcr-pull
@@ -53,6 +53,8 @@ spec:
           - secretRef:
               name: pii-pipeline-db
         env:
+          - name: RUN_ID
+            value: "{{workflow.parameters.run-id}}"
           - name: VAULT_ADDR
             value: http://vault.vault.svc:8200
           - name: VAULT_ROLE
@@ -76,6 +78,9 @@ spec:
       container:
         image: pii-pipeline
         args: ["review", "--run-id", "{{workflow.parameters.run-id}}"]
+        env:
+          - name: RUN_ID
+            value: "{{workflow.parameters.run-id}}"
         volumeMounts:
           - name: work
             mountPath: /work
@@ -100,6 +105,9 @@ spec:
         envFrom:
           - secretRef:
               name: pii-pipeline-aws
+        env:
+          - name: RUN_ID
+            value: "{{workflow.parameters.run-id}}"
         volumeMounts:
           - name: work
             mountPath: /work
