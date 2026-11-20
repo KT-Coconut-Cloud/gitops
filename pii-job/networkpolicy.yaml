@@ -28,9 +28,9 @@ spec:
               kubernetes.io/metadata.name: vault
       ports:
         - {protocol: TCP, port: 8200}
-    # Argo 실행기가 단계 결과를 API 서버에 보고
+    # Argo 실행기가 단계 결과를 API 서버(k3s-m1)에 보고
     - to:
-        - ipBlock: {cidr: 10.121.0.0/24}
+        - ipBlock: {cidr: 10.121.0.160/32}
       ports:
         - {protocol: TCP, port: 6443}
     # S3 반출 (클러스터, 사설 대역 제외)
