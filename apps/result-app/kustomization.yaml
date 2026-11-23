@@ -17,4 +17,4 @@ resources:
 images:
   - name: result-app
     newName: ghcr.io/kt-coconut-cloud/result-app
-    newTag: "cb5b1f1"
+    newTag: "c8da342"
