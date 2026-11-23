@@ -56,6 +56,7 @@ spec:
     - name: pseudonymize
       container:
         image: pii-pipeline
+        command: ["python", "-m", "pipeline"]
         args: ["pseudonymize"]
         envFrom:
           - secretRef:
@@ -90,6 +91,7 @@ spec:
     - name: review
       container:
         image: pii-pipeline
+        command: ["python", "-m", "pipeline"]
         args: ["review", "--run-id", "{{workflow.parameters.run-id}}"]
         env:
           - name: RUN_ID
@@ -114,6 +116,7 @@ spec:
     - name: export-gate
       container:
         image: pii-pipeline
+        command: ["python", "-m", "pipeline"]
         args: ["export"]
         envFrom:
           - secretRef:
