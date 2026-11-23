@@ -4,6 +4,8 @@ metadata:
   name: pii-pipeline
 spec:
   entrypoint: main
+  # 가명처리나 검토 단계에서 끝나면 실패 기록만 반입 버킷에 남김
+  onExit: exit-handler
   serviceAccountName: pii-pipeline
   arguments:
     parameters:
@@ -134,6 +136,40 @@ spec:
             memory: 256Mi
           limits:
             memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+
+    - name: exit-handler
+      steps:
+        - - name: report-failure
+            template: report-failure
+            when: "{{workflow.status}} != Succeeded"
+
+    # 검토 결과가 있으면 반출 단계가 이미 기록을 올렸으므로 아무것도 하지 않음
+    # 가명처리 단계에는 AWS 키가 없어서, 실패 기록은 반출용 키를 가진 이 단계에서 올림
+    - name: report-failure
+      container:
+        image: pii-pipeline
+        command: ["python", "-m", "pipeline"]
+        args: ["report-failure"]
+        envFrom:
+          - secretRef:
+              name: pii-pipeline-aws
+        env:
+          - name: RUN_ID
+            value: "{{workflow.parameters.run-id}}"
+        volumeMounts:
+          - name: work
+            mountPath: /work
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
