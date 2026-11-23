@@ -33,6 +33,14 @@ spec:
             storage: 1Gi
   volumeClaimGC:
     strategy: OnWorkflowCompletion
+  volumes:
+    # Vault CA 인증서 (보안 담당 관리 ConfigMap)
+    - name: vault-ca
+      configMap:
+        name: vault-ca
+        items:
+          - key: ca.crt
+            path: ca.crt
 
   templates:
     - name: main
@@ -56,12 +64,17 @@ spec:
           - name: RUN_ID
             value: "{{workflow.parameters.run-id}}"
           - name: VAULT_ADDR
-            value: http://vault.vault.svc:8200
+            value: https://vault-active.vault.svc.cluster.local:8200
           - name: VAULT_ROLE
             value: pii-pipeline
+          - name: VAULT_CACERT
+            value: /etc/vault-ca/ca.crt
         volumeMounts:
           - name: work
             mountPath: /work
+          - name: vault-ca
+            mountPath: /etc/vault-ca
+            readOnly: true
         resources:
           requests:
             cpu: 100m
