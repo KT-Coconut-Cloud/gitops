@@ -22,6 +22,7 @@ spec:
     secondsAfterCompletion: 86400
   podGC:
     strategy: OnWorkflowSuccess
+    deleteDelayDuration: 120s
   # 가명처리 결과는 단계 사이에서만 쓰고 워크플로가 끝나면 삭제
   volumeClaimTemplates:
     - metadata:
