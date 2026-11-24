@@ -18,4 +18,4 @@ configurations:
 images:
   - name: pii-pipeline
     newName: ghcr.io/kt-coconut-cloud/pii-pipeline
-    newTag: "b3dcd81"
+    newTag: "8e82909"
